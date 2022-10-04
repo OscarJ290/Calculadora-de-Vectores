@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+		<title>Vector Calculator</title>
+		<link href="https://cdn.jsdelivr.net/npm/bootswatch@5.0.2/dist/darkly/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+
+		<style> 
+			input::-webkit-inner-spin-button,input::-webkit-outer-spin-button {
+				-webkit-appearance: none;
+				margin: 0
+			}
+
+			input[type=number] {
+				-moz-appearance: textfield
+			}
+
+			.clockface {
+				all: unset;
+				width: 50%;
+				padding-top: 50%;
+				margin-left:auto;
+				margin-right:auto;
+				transform: translateY(0);
+				border-style: solid;
+				border-radius: 50%
+			}
+
+			.needle {
+				position: absolute;
+				top: 50%;
+				width: 50%;
+				transform-origin: 100%;
+				height: 6px
+			}
+		</style>
+	</head>
+
+	<body style="padding-top: 72px">
+		<nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark">
+			<div class="container-fluid">
+				<a class="navbar-brand" href="#">Calculadora de Vectores</a>
+				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+				<div class="collapse navbar-collapse" id="navbarSupportedContent">
+					<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+						<li class="nav-item">
+							<button type="button" class="btn btn-outline" data-bs-toggle="modal" data-bs-target="#formula">Autores</button>
+						</li>
+					</ul>
+					<a class="btn btn-outline-success" href="https://github.com/OscarJ290/Calculadora-de-Vectores" role="button">Fuente</a>
+				</div>
+			</div>
+		</nav>
+
+		<div class="modal fade" id="formula" tabindex="-1" aria-labelledby="formulaLabel" aria-hidden="true">
+			<div class="modal-dialog modal-fullscreen-md-down">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="formulaLabel">Autores</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<p>Villa García Oscar Joaquín</p>
+						
+						<p>Erandi Soublett Martínez</p>
+						
+						<p>Otro vato xdd</p>
+						
+						
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="container">
+			<div>
+				<label>Primer Vector</label>
+				<div class="row">
+					<div class="col-sm">
+						<input type="number" inputmode="decimal" class="form-control" id="vec_one_mag" oninput="handle()" placeholder="Magnitud" aria-label="Magnitud">
+					</div>
+					<div class="col-sm">
+						<input type="number" inputmode="decimal" class="form-control" id="vec_one_dir" oninput="handle()" placeholder="Direccion (grados)" aria-label="Direccion (grados)">
+					</div>
+				</div>
+			</div>
+			<div>
+				<label>Segundo vector</label>
+				<div class="row">
+					<div class="col-sm">
+						<input type="number" inputmode="decimal" class="form-control" id="vec_two_mag" oninput="handle()" placeholder="Magnitud" aria-label="Magnitud">
+					</div>
+					<div class="col-sm">
+						<input type="number" inputmode="decimal" class="form-control" id="vec_two_dir" oninput="handle()" placeholder="Direccion (grados)" aria-label="Direccion (grados)">
+					</div>
+				</div>
+			</div>
+			<div hidden id="result_div">
+				<label>Vector Resultante</label>
+				<div class="row">
+					<div class="col">
+						<input type="text" readonly class="form-control" id="vec_res_mag">
+					</div>
+					<div class="col">
+						<input type="text" readonly class="form-control" id="vec_res_dir">
+					</div>
+				</div>
+				<label>Diagrama</label>
+				<div class="row">
+					<div class="clockface">
+						<div class="needle"></div>
+						<div class="needle"></div>
+						<div class="needle"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+		<script>
+			const holder_div = document.getElementById("result_div");
+			const needles = holder_div.querySelectorAll("div.needle");
+			const text_boxes = [
+				document.getElementById("vec_one_mag"),
+				document.getElementById("vec_one_dir"),
+				document.getElementById("vec_two_mag"),
+				document.getElementById("vec_two_dir"),
+				document.getElementById("vec_res_mag"),
+				document.getElementById("vec_res_dir"),
+			];
+			
+			function handle() {
+				for (let i = 0; i < 4; ++i) {
+					if (Number.isNaN(+text_boxes[i].value) || text_boxes[i].value === "") {
+						holder_div.hidden = true;
+						return;
+					}
+				}
+				const a_vec = [ +text_boxes[0].value, +text_boxes[1].value ];
+				const b_vec = [ +text_boxes[2].value, +text_boxes[3].value ];
+				const res_vec = vec_add(a_vec, b_vec);
+				text_boxes[4].value = res_vec[0];
+				text_boxes[5].value = res_vec[1] + "°";
+				
+				let vec_arr = [
+					{ v: a_vec, res: false },
+					{ v: b_vec, res: false },
+					{ v: res_vec, res: true }
+				];
+				vec_arr.sort((a, b) => {
+					return b.v[0] - a.v[0];
+				});
+				vec_arr.forEach((val, idx, arr) => {
+					const elem = needles[idx];
+					const mag_proportion = 100 - +(val.v[0] / arr[0].v[0] * 100).toFixed(1);
+					const color = val.res ? "#FF0000" : "#FFF";
+					elem.style.transform = "rotate("+(val.v[1]+90)+"deg)";
+					elem.style.background = "linear-gradient(to right,rgba(255,0,0,0) 0,rgba(255,0,0,0) "+mag_proportion+"%,"+color+" "+mag_proportion+"%,"+color+" 100%)";
+				});
+				holder_div.hidden = false;
+			}
+			
+			function vec_add(a_vec, b_vec) { //formato del vector: [ magnitud, ángulo en grados ]
+				const d2r = x => x * Math.PI / 180; //Funciones para la conversion de grados a radianes
+				const r2d = x => x * 180 / Math.PI;
+				const cos = x => Math.cos(d2r(x)); //Funciones matemáticas estandar
+				const sin = x => Math.sin(d2r(x));
+				
+				const a_cart = [ //Formato cartesiano: [ coordenada X, coordenada Y ]
+					a_vec[0] * cos(a_vec[1]),
+					a_vec[0] * sin(a_vec[1])
+				];
+				
+				const b_cart = [
+					b_vec[0] * cos(b_vec[1]),
+					b_vec[0] * sin(b_vec[1])
+				];
+				
+				const sum_cart = [
+					a_cart[0] + b_cart[0],
+					a_cart[1] + b_cart[1]
+				];
+				
+				const sum_vec = [
+					Math.sqrt((sum_cart[0] * sum_cart[0]) + (sum_cart[1] * sum_cart[1])), //Magnitud
+					r2d(Math.atan2(sum_cart[1], sum_cart[0]))
+				];
+				
+				if (sum_vec[1] < 0) //Si el ángulo es negativo añade 360°
+					sum_vec[1] += 360
+				
+				return [ +sum_vec[0].toFixed(2), +sum_vec[1].toFixed(2) ]; 
+			}
+		</script>
+	</body>
+</html>
